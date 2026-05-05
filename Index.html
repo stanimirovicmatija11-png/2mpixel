@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2mpixel.com — Own Your Pixel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --black: #080808;
+  --white: #f2f0eb;
+  --gold: #e8c84a;
+  --gold2: #f5a623;
+  --dim: #2a2a2a;
+  --muted: #666;
+  --green: #3ddc84;
+  --red: #ff4d4d;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'DM Mono', monospace;
+  cursor: none;
+}
+
+/* CURSOR */
+#cursor {
+  position: fixed; width: 12px; height: 12px;
+  background: var(--gold); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: width 0.2s, height 0.2s;
+  mix-blend-mode: difference;
+}
+#cursor.big { width: 36px; height: 36px; }
+
+/* NAV */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:500;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 16px 40px;
+  background: rgba(8,8,8,0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #1a1a1a;
+}
+.nav-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:20px; letter-spacing:-1px; }
+.nav-logo span { color:var(--gold); }
+.nav-stats { display:flex; gap:28px; font-size:11px; color:var(--muted); }
+.nav-stats strong { color:var(--white); }
+.nav-cta {
+  background:var(--gold); color:var(--black); border:none;
+  padding:10px 22px; font-family:'Syne',sans-serif; font-weight:700;
+  font-size:12px; letter-spacing:1px; text-transform:uppercase;
+  cursor:none; transition:all 0.2s;
+}
+.nav-cta:hover { background:var(--gold2); }
+
+/* PROGRESS */
+.progress-wrap { height:3px; background:#111; position:sticky; top:57px; z-index:400; }
+.progress-bar { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold2)); width:0%; transition:width 0.6s; }
+
+/* HERO */
+.hero {
+  min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center;
+  padding:120px 20px 60px; position:relative; overflow:hidden;
+}
+.hero-glow {
+  position:absolute; width:700px; height:700px;
+  background:radial-gradient(circle, rgba(232,200,74,0.07) 0%, transparent 70%);
+  top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;
+}
+.hero-tag { font-size:11px; letter-spacing:5px; text-transform:uppercase; color:var(--gold); margin-bottom:20px; animation:fadeUp 0.7s ease both; }
+.hero-title {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:clamp(52px,11vw,130px); line-height:0.9; letter-spacing:-3px;
+  animation:fadeUp 0.7s 0.1s ease both;
+}
+.hero-title em { color:var(--gold); font-style:normal; }
+.hero-desc { max-width:520px; margin:28px auto 0; font-size:14px; line-height:1.8; color:#888; animation:fadeUp 0.7s 0.2s ease both; }
+.hero-desc strong { color:var(--white); }
+.hero-btns { display:flex; gap:14px; justify-content:center; margin-top:36px; animation:fadeUp 0.7s 0.3s ease both; flex-wrap:wrap; }
+.btn-primary { background:var(--gold); color:var(--black); border:none; padding:15px 32px; font-family:'Syne',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; text-transform:uppercase; cursor:none; transition:all 0.2s; }
+.btn-primary:hover { background:var(--gold2); transform:translateY(-2px); }
+.btn-secondary { background:transparent; color:var(--white); border:1px solid #333; padding:15px 32px; font-family:'Syne',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; text-transform:uppercase; cursor:none; transition:all 0.2s; }
+.btn-secondary:hover { border-color:var(--gold); color:var(--gold); }
+.hero-numbers { display:flex; gap:44px; justify-content:center; margin-top:56px; animation:fadeUp 0.7s 0.4s ease both; flex-wrap:wrap; }
+.hero-num-val { font-family:'Syne',sans-serif; font-size:34px; font-weight:800; color:var(--gold); line-height:1; }
+.hero-num-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-top:5px; }
+
+/* HOW IT WORKS */
+.how { padding:100px 40px; max-width:1100px; margin:0 auto; }
+.section-title { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(30px,5vw,54px); letter-spacing:-2px; margin-bottom:50px; }
+.section-title span { color:var(--gold); }
+.steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:2px; }
+.step { background:#0f0f0f; padding:36px 28px; border:1px solid #1a1a1a; transition:border-color 0.2s; }
+.step:hover { border-color:var(--gold); }
+.step-num { font-family:'Syne',sans-serif; font-size:44px; font-weight:800; color:#1e1e1e; line-height:1; margin-bottom:16px; }
+.step h3 { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; margin-bottom:10px; }
+.step p { font-size:12px; line-height:1.8; color:var(--muted); }
+
+/* PRICING */
+.pricing { padding:80px 40px; background:#0a0a0a; border-top:1px solid #1a1a1a; border-bottom:1px solid #1a1a1a; }
+.pricing-inner { max-width:900px; margin:0 auto; }
+.pricing-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; margin-top:44px; }
+.price-card { border:1px solid #222; padding:36px 28px; position:relative; transition:all 0.2s; }
+.price-card:hover { border-color:var(--gold); transform:translateY(-4px); }
+.price-card.featured { border-color:var(--gold); background:linear-gradient(135deg,#0f0e08,#0a0a0a); }
+.price-badge { position:absolute; top:-1px; right:20px; background:var(--gold); color:var(--black); font-size:9px; letter-spacing:2px; text-transform:uppercase; font-weight:700; padding:4px 10px; font-family:'Syne',sans-serif; }
+.price-type { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
+.price-amount { font-family:'Syne',sans-serif; font-size:50px; font-weight:800; line-height:1; color:var(--gold); }
+.price-amount sup { font-size:20px; vertical-align:top; margin-top:10px; }
+.price-amount sub { font-size:13px; color:var(--muted); }
+.price-desc { font-size:12px; color:var(--muted); margin:14px 0 20px; line-height:1.7; }
+.price-features { list-style:none; }
+.price-features li { font-size:12px; color:#aaa; padding:7px 0; border-bottom:1px solid #1a1a1a; display:flex; align-items:center; gap:8px; }
+.price-features li::before { content:'→'; color:var(--gold); font-size:10px; }
+
+/* GRID SECTION */
+.grid-section { padding:80px 0 0; }
+.grid-header { padding:0 40px 36px; max-width:1200px; margin:0 auto; display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+.grid-legend { display:flex; gap:18px; align-items:center; margin-top:12px; }
+.legend-item { display:flex; align-items:center; gap:7px; font-size:11px; color:var(--muted); }
+.legend-dot { width:12px; height:12px; }
+.legend-dot.free { background:#1a1a1a; border:1px solid #333; }
+.legend-dot.taken { background:var(--gold); }
+.legend-dot.hover { background:var(--green); }
+.grid-controls { display:flex; gap:8px; align-items:center; }
+.ctrl-btn { background:transparent; border:1px solid #2a2a2a; color:#888; padding:8px 16px; font-family:'DM Mono',monospace; font-size:11px; cursor:none; transition:all 0.15s; }
+.ctrl-btn:hover { border-color:var(--gold); color:var(--gold); }
+.zoom-val { font-size:11px; color:var(--muted); min-width:28px; text-align:center; }
+.grid-wrap { overflow:auto; background:#030303; border-top:1px solid #111; border-bottom:1px solid #111; }
+#grid-canvas { display:block; margin:0 auto; cursor:none; }
+.grid-footer { padding:16px 40px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:#0a0a0a; border-bottom:1px solid #111; }
+.grid-info { font-size:11px; color:var(--muted); }
+.grid-info span { color:var(--gold); }
+#hover-info { font-size:11px; color:#555; min-height:16px; }
+
+/* MODAL */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.88); backdrop-filter:blur(6px); z-index:1000; display:flex; align-items:center; justify-content:center; padding:16px; opacity:0; pointer-events:none; transition:opacity 0.25s; }
+.modal-overlay.open { opacity:1; pointer-events:all; }
+.modal { background:#0f0f0f; border:1px solid #2a2a2a; width:100%; max-width:500px; max-height:92vh; overflow-y:auto; transform:translateY(20px); transition:transform 0.25s; }
+.modal-overlay.open .modal { transform:translateY(0); }
+.modal-header { padding:28px 28px 20px; border-bottom:1px solid #1a1a1a; display:flex; justify-content:space-between; align-items:flex-start; }
+.modal-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; }
+.modal-sub { font-size:11px; color:var(--muted); margin-top:3px; }
+.modal-close { background:none; border:none; color:var(--muted); font-size:22px; cursor:none; line-height:1; }
+.modal-close:hover { color:var(--white); }
+.modal-body { padding:24px 28px; }
+.field { margin-bottom:18px; }
+.field label { display:block; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:7px; }
+.field input, .field select {
+  width:100%; background:#080808; border:1px solid #222; color:var(--white);
+  padding:11px 14px; font-family:'DM Mono',monospace; font-size:13px; outline:none; transition:border-color 0.15s; cursor:none;
+}
+.field input:focus, .field select:focus { border-color:var(--gold); }
+.field select option { background:#0f0f0f; }
+
+.plan-toggle { display:grid; grid-template-columns:1fr 1fr; gap:2px; margin-bottom:20px; }
+.plan-opt { padding:14px; border:1px solid #222; text-align:center; cursor:none; transition:all 0.15s; }
+.plan-opt.active { border-color:var(--gold); background:rgba(232,200,74,0.06); }
+.plan-opt-name { font-family:'Syne',sans-serif; font-weight:700; font-size:14px; }
+.plan-opt-price { font-size:11px; color:var(--muted); margin-top:3px; }
+.plan-opt.active .plan-opt-price { color:var(--gold); }
+
+.size-selector { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px; }
+.size-opt { border:1px solid #222; padding:11px 6px; text-align:center; cursor:none; transition:all 0.15s; }
+.size-opt:hover { border-color:#444; }
+.size-opt.active { border-color:var(--gold); background:rgba(232,200,74,0.05); }
+.size-opt-dim { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; }
+.size-opt-px { font-size:10px; color:var(--muted); margin-top:2px; }
+.size-opt-price { font-size:11px; color:var(--gold); margin-top:3px; }
+
+.pixel-summary { background:#080808; border:1px solid #1a1a1a; padding:14px 18px; margin:20px 0; display:flex; justify-content:space-between; align-items:center; font-size:12px; }
+.pixel-summary-total { font-family:'Syne',sans-serif; font-size:26px; font-weight:800; color:var(--gold); }
+
+.upload-area {
+  border:1px dashed #333; padding:20px; text-align:center;
+  cursor:none; transition:border-color 0.2s; position:relative; margin-top:8px;
+}
+.upload-area:hover { border-color:var(--gold); }
+.upload-area input[type=file] { position:absolute; inset:0; opacity:0; cursor:none; width:100%; }
+.upload-label { font-size:12px; color:var(--muted); }
+.upload-label span { color:var(--gold); }
+#upload-preview { width:80px; height:80px; object-fit:cover; margin-top:10px; display:none; }
+
+.modal-footer { padding:16px 28px 24px; border-top:1px solid #1a1a1a; }
+.btn-submit { width:100%; background:var(--gold); color:var(--black); border:none; padding:16px; font-family:'Syne',sans-serif; font-weight:700; font-size:14px; letter-spacing:2px; text-transform:uppercase; cursor:none; transition:all 0.2s; }
+.btn-submit:hover { background:var(--gold2); }
+.btn-submit:disabled { background:#333; color:#666; cursor:not-allowed; }
+.stripe-note { text-align:center; font-size:10px; color:#444; margin-top:10px; letter-spacing:1px; }
+
+/* TOOLTIP */
+#grid-tooltip {
+  position:fixed; background:#111; border:1px solid #2a2a2a;
+  padding:8px 14px; font-size:11px; pointer-events:none;
+  z-index:800; display:none; max-width:200px;
+}
+#grid-tooltip strong { display:block; color:var(--gold); font-family:'Syne',sans-serif; }
+#grid-tooltip span { color:var(--muted); font-size:10px; }
+
+/* FAQ */
+.faq { padding:90px 40px; max-width:780px; margin:0 auto; }
+.faq-item { border-bottom:1px solid #1a1a1a; padding:24px 0; }
+.faq-q { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; cursor:none; display:flex; justify-content:space-between; align-items:center; }
+.faq-q .faq-icon { color:var(--gold); font-size:20px; transition:transform 0.2s; }
+.faq-a { font-size:12px; line-height:1.8; color:var(--muted); max-height:0; overflow:hidden; transition:max-height 0.3s, margin 0.3s; }
+.faq-item.open .faq-a { max-height:160px; margin-top:14px; }
+.faq-item.open .faq-icon { transform:rotate(45deg); }
+
+/* FOOTER */
+footer { background:#030303; border-top:1px solid #111; padding:44px 40px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+.footer-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:22px; letter-spacing:-1px; }
+.footer-logo span { color:var(--gold); }
+.footer-copy { font-size:11px; color:#444; }
+
+/* TOAST */
+.toast { position:fixed; bottom:28px; right:28px; padding:13px 22px; font-family:'Syne',sans-serif; font-weight:700; font-size:13px; z-index:2000; transform:translateY(60px); opacity:0; transition:all 0.3s; }
+.toast.success { background:var(--green); color:#000; }
+.toast.error { background:var(--red); color:#fff; }
+.toast.show { transform:translateY(0); opacity:1; }
+
+/* LOADING */
+.loading-overlay { position:fixed; inset:0; background:var(--black); z-index:9000; display:flex; align-items:center; justify-content:center; transition:opacity 0.5s; }
+.loading-overlay.hidden { opacity:0; pointer-events:none; }
+.loading-text { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; color:var(--gold); }
+.loading-dot { animation:blink 1s infinite; }
+.loading-dot:nth-child(2) { animation-delay:0.2s; }
+.loading-dot:nth-child(3) { animation-delay:0.4s; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+@keyframes blink { 0%,100%{opacity:0.2} 50%{opacity:1} }
+
+@media(max-width:600px) {
+  nav { padding:12px 16px; }
+  .nav-stats { display:none; }
+  .hero-numbers { gap:24px; }
+  .grid-header { padding:0 16px 24px; }
+  .modal-body { padding:18px 18px; }
+  .modal-header { padding:20px 18px 16px; }
+  .modal-footer { padding:14px 18px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-text">Loading<span class="loading-dot">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span></div>
+</div>
+
+<!-- TOOLTIP -->
+<div id="grid-tooltip"><strong id="tt-name"></strong><span id="tt-url"></span></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">2m<span>pixel</span>.com</div>
+  <div class="nav-stats">
+    <div>Free <strong id="nav-free">—</strong></div>
+    <div>Sold <strong id="nav-sold">—</strong></div>
+    <div>Earned <strong id="nav-earned">—</strong></div>
+  </div>
+  <button class="nav-cta" onclick="openModal()">Buy Pixels</button>
+</nav>
+<div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <p class="hero-tag">The internet's biggest pixel billboard</p>
+  <h1 class="hero-title">2 Million<br><em>Pixels.</em><br>Your Ad.</h1>
+  <p class="hero-desc">Own a piece of internet history. Buy pixels from <strong>$25</strong> — place your logo and link. Monthly or one-time. <strong>First come, first served.</strong></p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="document.getElementById('grid-section').scrollIntoView({behavior:'smooth'})">Browse the Grid</button>
+    <button class="btn-secondary" onclick="openModal()">Buy Now →</button>
+  </div>
+  <div class="hero-numbers">
+    <div class="hero-num"><div class="hero-num-val" id="h-sold">—</div><div class="hero-num-label">Pixels Sold</div></div>
+    <div class="hero-num"><div class="hero-num-val" id="h-owners">—</div><div class="hero-num-label">Advertisers</div></div>
+    <div class="hero-num"><div class="hero-num-val">$25</div><div class="hero-num-label">From</div></div>
+    <div class="hero-num"><div class="hero-num-val">2M</div><div class="hero-num-label">Total Pixels</div></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <h2 class="section-title">How it <span>works</span></h2>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><h3>Choose Your Block</h3><p>Pick a free spot on the grid. Minimum 5×5 pixels ($25). Bigger buyers choose their position.</p></div>
+    <div class="step"><div class="step-num">02</div><h3>Pick Your Plan</h3><p>One-time forever payment or monthly subscription (min 3 months). Cancel anytime after.</p></div>
+    <div class="step"><div class="step-num">03</div><h3>Upload Your Ad</h3><p>Upload your logo/image and paste your URL. Your ad goes live as soon as payment clears.</p></div>
+    <div class="step"><div class="step-num">04</div><h3>Get Traffic</h3><p>Visitors hover to see your brand, click to visit your site. Millions of impressions over time.</p></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing">
+  <div class="pricing-inner">
+    <h2 class="section-title">Simple <span>pricing</span></h2>
+    <div class="pricing-cards">
+      <div class="price-card">
+        <div class="price-type">One-Time Purchase</div>
+        <div class="price-amount"><sup>$</sup>1<sub>/px</sub></div>
+        <p class="price-desc">Pay once, stay forever. From $25 minimum (5×5 block).</p>
+        <ul class="price-features"><li>Permanent placement</li><li>Logo + link</li><li>Hover tooltip</li><li>Bulk discounts available</li></ul>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">Popular</div>
+        <div class="price-type">Monthly Subscription</div>
+        <div class="price-amount"><sup>$</sup>1<sub>/px/mo</sub></div>
+        <p class="price-desc">3-month minimum. Update your ad every month.</p>
+        <ul class="price-features"><li>Update ad monthly</li><li>Logo + link</li><li>Hover tooltip</li><li>Priority support</li></ul>
+      </div>
+      <div class="price-card">
+        <div class="price-type">Bulk / Agency</div>
+        <div class="price-amount"><sup>$</sup>0.6<sub>/px</sub></div>
+        <p class="price-desc">5,000+ pixels. Custom invoice and placement.</p>
+        <ul class="price-features"><li>40% discount</li><li>Invoice payment</li><li>Custom placement</li><li>contact@2mpixel.com</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GRID -->
+<section class="grid-section" id="grid-section">
+  <div class="grid-header">
+    <div>
+      <h2 class="section-title" style="margin-bottom:12px">The <span>Grid</span></h2>
+      <div class="grid-legend">
+        <div class="legend-item"><div class="legend-dot free"></div>Available</div>
+        <div class="legend-item"><div class="legend-dot taken"></div>Sold</div>
+        <div class="legend-item"><div class="legend-dot hover"></div>Hover</div>
+      </div>
+    </div>
+    <div class="grid-controls">
+      <button class="ctrl-btn" id="btn-zo">− Zoom</button>
+      <span class="zoom-val" id="zoom-val">1×</span>
+      <button class="ctrl-btn" id="btn-zi">+ Zoom</button>
+    </div>
+  </div>
+  <div class="grid-wrap"><canvas id="grid-canvas"></canvas></div>
+  <div class="grid-footer">
+    <div class="grid-info">Grid: <span>2000×1000</span> · Free: <span id="gf-free">—</span> · Sold: <span id="gf-sold">—</span></div>
+    <div id="hover-info">Hover the grid to explore · Click free area to buy</div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <h2 class="section-title">FAQ</h2>
+  <div class="faq-item"><div class="faq-q">What is the minimum purchase? <span class="faq-icon">+</span></div><div class="faq-a">The minimum block is 5×5 pixels = 25 pixels = $25 one-time or $25/month.</div></div>
+  <div class="faq-item"><div class="faq-q">How does monthly subscription work? <span class="faq-icon">+</span></div><div class="faq-a">You pay for a minimum of 3 months upfront. After that, it's month-to-month. Cancel anytime and your pixels become available to others.</div></div>
+  <div class="faq-item"><div class="faq-q">Can I choose where my pixels go? <span class="faq-icon">+</span></div><div class="faq-a">Small purchases (under 500px) are automatically placed in available spots. Purchases of 500px+ get free placement choice on the grid.</div></div>
+  <div class="faq-item"><div class="faq-q">What image formats are accepted? <span class="faq-icon">+</span></div><div class="faq-a">PNG, JPG, GIF (static), WebP. Max file size 2MB. Your image will be scaled to fit your pixel block.</div></div>
+  <div class="faq-item"><div class="faq-q">When does my ad go live? <span class="faq-icon">+</span></div><div class="faq-a">Automatically after payment clears — usually within minutes. All ads pass a basic content filter before appearing.</div></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">2m<span>pixel</span>.com</div>
+  <div class="footer-copy">© 2025 2mpixel.com · contact@2mpixel.com</div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div><div class="modal-title">Buy Your Pixels</div><div class="modal-sub" id="modal-coords-info">Secure checkout via Paddle</div></div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Plan -->
+      <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:9px">Plan</div>
+      <div class="plan-toggle">
+        <div class="plan-opt active" id="plan-onetime" onclick="selectPlan('onetime')"><div class="plan-opt-name">One-Time</div><div class="plan-opt-price">$1/px · forever</div></div>
+        <div class="plan-opt" id="plan-monthly" onclick="selectPlan('monthly')"><div class="plan-opt-name">Monthly</div><div class="plan-opt-price">$1/px/mo · min 3mo</div></div>
+      </div>
+
+      <!-- Size -->
+      <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:9px;margin-top:20px">Block Size</div>
+      <div class="size-selector">
+        <div class="size-opt active" id="sz-5" onclick="selectSize(5,5)"><div class="size-opt-dim">5×5</div><div class="size-opt-px">25 px</div><div class="size-opt-price" id="szp-5">$25</div></div>
+        <div class="size-opt" id="sz-10" onclick="selectSize(10,10)"><div class="size-opt-dim">10×10</div><div class="size-opt-px">100 px</div><div class="size-opt-price" id="szp-10">$100</div></div>
+        <div class="size-opt" id="sz-20" onclick="selectSize(20,20)"><div class="size-opt-dim">20×20</div><div class="size-opt-px">400 px</div><div class="size-opt-price" id="szp-20">$400</div></div>
+        <div class="size-opt" id="sz-50" onclick="selectSize(50,50)"><div class="size-opt-dim">50×50</div><div class="size-opt-px">2,500 px</div><div class="size-opt-price" id="szp-50">$2,500</div></div>
+        <div class="size-opt" id="sz-100" onclick="selectSize(100,100)"><div class="size-opt-dim">100×100</div><div class="size-opt-px">10,000 px</div><div class="size-opt-price" id="szp-100">$10,000</div></div>
+        <div class="size-opt" id="sz-custom" onclick="selectSize(0,0)"><div class="size-opt-dim">Custom</div><div class="size-opt-px">500px+</div><div class="size-opt-price">contact</div></div>
+      </div>
+
+      <!-- Summary -->
+      <div class="pixel-summary">
+        <div><div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase">Total</div><div class="pixel-summary-total" id="modal-total">$25</div></div>
+        <div style="text-align:right;font-size:11px;color:var(--muted)"><div id="modal-size-info">5×5 · 25 pixels</div><div id="modal-plan-info">One-time payment</div></div>
+      </div>
+
+      <!-- Fields -->
+      <div class="field"><label>Company / Brand *</label><input type="text" id="f-name" placeholder="Your Company"></div>
+      <div class="field"><label>Website URL *</label><input type="url" id="f-url" placeholder="https://yoursite.com"></div>
+      <div class="field"><label>Email *</label><input type="email" id="f-email" placeholder="you@email.com"></div>
+
+      <!-- Image upload -->
+      <div class="field">
+        <label>Ad Image (logo) *</label>
+        <div class="upload-area">
+          <input type="file" id="f-image" accept="image/png,image/jpeg,image/gif,image/webp" onchange="previewImage(event)">
+          <div class="upload-label">Drop image or <span>click to browse</span><br><small style="font-size:10px;color:#444">PNG, JPG, GIF · max 2MB</small></div>
+          <img id="upload-preview" alt="preview">
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-submit" id="btn-submit" onclick="submitOrder()">Proceed to Checkout →</button>
+      <div class="stripe-note">🔒 Secured by Paddle · SSL encrypted</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://gyxwqqyihqxuydqyldyr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5eHdxcXlpaHF4dXlkcXlsZHlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MjYyNjIsImV4cCI6MjA5MzUwMjI2Mn0.Un7yB3tx73yu-TvTIqWHYJMP2rocCEIpkXHPwuwoNtQ';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const COLS = 2000, ROWS = 1000, TOTAL = COLS * ROWS;
+
+// ── CURSOR ────────────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top  = e.clientY + 'px';
+});
+document.querySelectorAll('button, .plan-opt, .size-opt, .faq-q, .price-card, .step, canvas, .upload-area').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
+
+// ── CANVAS GRID ───────────────────────────────────────────────
+const canvas  = document.getElementById('grid-canvas');
+const ctx     = canvas.getContext('2d');
+const zooms   = [1, 2, 4, 8];
+let   zoomIdx = 0, zoom = 1;
+let   imgData, buf32;
+let   activeBlocks = []; // loaded from supabase
+let   hoveredIdx   = -1;
+
+function hexToRgba(hex) {
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return (0xff<<24)|(b<<16)|(g<<8)|r;
+}
+
+function initCanvas() {
+  const W=COLS*zoom, H=ROWS*zoom;
+  canvas.width=W; canvas.height=H;
+  imgData = ctx.createImageData(W,H);
+  buf32   = new Uint32Array(imgData.data.buffer);
+  redraw();
+}
+
+function fillRect(x,y,w,h,rgba) {
+  const W=COLS*zoom;
+  for(let dy=0;dy<h*zoom;dy++)
+    for(let dx=0;dx<w*zoom;dx++)
+      buf32[(y*zoom+dy)*W+(x*zoom+dx)]=rgba;
+}
+
+function redraw() {
+  buf32.fill(0xff111111);
+  activeBlocks.forEach((b,i) => {
+    const col = i===hoveredIdx ? 0xff99ffcc : hexToRgba(b.color||'#e8c84a');
+    fillRect(b.x, b.y, b.width, b.height, col);
+  });
+  ctx.putImageData(imgData,0,0);
+}
+
+function getBlockAt(cx,cy) {
+  const gx=Math.floor(cx/zoom), gy=Math.floor(cy/zoom);
+  return activeBlocks.findIndex(b=>gx>=b.x&&gx<b.x+b.width&&gy>=b.y&&gy<b.y+b.height);
+}
+
+// tooltip
+const tooltip = document.getElementById('grid-tooltip');
+canvas.addEventListener('mousemove', e => {
+  const r=canvas.getBoundingClientRect();
+  const cx=(e.clientX-r.left)*(canvas.width/r.width);
+  const cy=(e.clientY-r.top)*(canvas.height/r.height);
+  const gx=Math.floor(cx/zoom), gy=Math.floor(cy/zoom);
+  const bi=getBlockAt(cx,cy);
+
+  if(bi!==hoveredIdx){ hoveredIdx=bi; redraw(); }
+
+  if(bi>=0){
+    const b=activeBlocks[bi];
+    document.getElementById('hover-info').innerHTML=
+      `<span style="color:var(--gold)">${b.company_name}</span> · ${b.width}×${b.height}px · <span style="color:#555">${b.link_url}</span>`;
+    document.getElementById('tt-name').textContent=b.company_name;
+    document.getElementById('tt-url').textContent=b.link_url;
+    tooltip.style.display='block';
+    tooltip.style.left=(e.clientX+16)+'px';
+    tooltip.style.top=(e.clientY-10)+'px';
+  } else {
+    document.getElementById('hover-info').textContent=`X:${gx} Y:${gy} · Available — click to buy`;
+    tooltip.style.display='none';
+  }
+});
+
+canvas.addEventListener('click', e => {
+  const r=canvas.getBoundingClientRect();
+  const cx=(e.clientX-r.left)*(canvas.width/r.width);
+  const cy=(e.clientY-r.top)*(canvas.height/r.height);
+  const bi=getBlockAt(cx,cy);
+  if(bi>=0){
+    window.open(activeBlocks[bi].link_url,'_blank');
+  } else {
+    const gx=Math.floor(cx/zoom), gy=Math.floor(cy/zoom);
+    openModal({x:gx,y:gy});
+  }
+});
+
+canvas.addEventListener('mouseleave', ()=>{
+  hoveredIdx=-1; redraw();
+  tooltip.style.display='none';
+  document.getElementById('hover-info').textContent='Hover the grid to explore · Click free area to buy';
+});
+
+// zoom
+document.getElementById('btn-zi').addEventListener('click',()=>{
+  if(zoomIdx<zooms.length-1){zoomIdx++;zoom=zooms[zoomIdx];initCanvas();}
+  document.getElementById('zoom-val').textContent=zoom+'×';
+});
+document.getElementById('btn-zo').addEventListener('click',()=>{
+  if(zoomIdx>0){zoomIdx--;zoom=zooms[zoomIdx];initCanvas();}
+  document.getElementById('zoom-val').textContent=zoom+'×';
+});
+
+// ── SUPABASE LOAD ─────────────────────────────────────────────
+async function loadPixels() {
+  const {data,error} = await sb.from('pixels').select('*').eq('status','active');
+  if(error){ console.error(error); return; }
+  activeBlocks = data || [];
+  const sold = activeBlocks.reduce((s,b)=>s+b.width*b.height,0);
+  const owners = activeBlocks.length;
+  updateStats(sold,owners);
+  redraw();
+  document.getElementById('loading').classList.add('hidden');
+}
+
+function updateStats(sold,owners) {
+  const fmt=n=>n.toLocaleString('en-US');
+  const free=TOTAL-sold;
+  document.getElementById('nav-free').textContent=fmt(free);
+  document.getElementById('nav-sold').textContent=fmt(sold);
+  document.getElementById('nav-earned').textContent='$'+fmt(sold);
+  document.getElementById('h-sold').textContent=fmt(sold);
+  document.getElementById('h-owners').textContent=fmt(owners);
+  document.getElementById('gf-free').textContent=fmt(free);
+  document.getElementById('gf-sold').textContent=fmt(sold);
+  document.getElementById('progress-bar').style.width=(sold/TOTAL*100)+'%';
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+let selPlan='onetime', selW=5, selH=5;
+let clickedCoords=null;
+let uploadedFile=null;
+
+function openModal(coords){
+  clickedCoords=coords||null;
+  if(coords) document.getElementById('modal-coords-info').textContent=`Position: X${coords.x} Y${coords.y}`;
+  else document.getElementById('modal-coords-info').textContent='Secure checkout via Paddle';
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
+
+function selectPlan(p){
+  selPlan=p;
+  document.getElementById('plan-onetime').classList.toggle('active',p==='onetime');
+  document.getElementById('plan-monthly').classList.toggle('active',p==='monthly');
+  updateSummary();
+}
+
+const sizeMap={'5':'5x5','10':'10x10','20':'20x20','50':'50x50','100':'100x100'};
+function selectSize(w,h){
+  if(w===0){showToast('Contact us: contact@2mpixel.com','success');return;}
+  selW=w;selH=h;
+  ['5','10','20','50','100','custom'].forEach(k=>document.getElementById('sz-'+k).classList.remove('active'));
+  const key=Object.entries(sizeMap).find(([k,v])=>v===w+'x'+h);
+  if(key) document.getElementById('sz-'+key[0]).classList.add('active');
+  updateSummary();
+}
+
+function updateSummary(){
+  const px=selW*selH, base=px;
+  const suffix=selPlan==='monthly'?'/mo':'';
+  document.getElementById('modal-total').textContent='$'+base.toLocaleString()+suffix;
+  document.getElementById('modal-size-info').textContent=`${selW}×${selH} · ${px.toLocaleString()} pixels`;
+  document.getElementById('modal-plan-info').textContent=selPlan==='monthly'
+    ?`Monthly · 3mo min · $${(base*3).toLocaleString()} upfront`:'One-time payment';
+  ['5','10','20','50','100'].forEach(k=>{
+    const dims=sizeMap[k].split('x');
+    const p=parseInt(dims[0])*parseInt(dims[1]);
+    document.getElementById('szp-'+k).textContent='$'+p.toLocaleString()+(selPlan==='monthly'?'/mo':'');
+  });
+}
+
+function previewImage(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  if(file.size>2*1024*1024){showToast('Image too large. Max 2MB.','error');return;}
+  uploadedFile=file;
+  const prev=document.getElementById('upload-preview');
+  prev.src=URL.createObjectURL(file);
+  prev.style.display='block';
+}
+
+async function submitOrder(){
+  const name=document.getElementById('f-name').value.trim();
+  const url=document.getElementById('f-url').value.trim();
+  const email=document.getElementById('f-email').value.trim();
+  if(!name||!url||!email||!uploadedFile){
+    showToast('Please fill all fields and upload an image.','error');return;
+  }
+  const btn=document.getElementById('btn-submit');
+  btn.disabled=true;
+  btn.textContent='Processing…';
+
+  try {
+    // 1. Upload image to Supabase storage
+    const ext=uploadedFile.name.split('.').pop();
+    const fname=`${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const {data:upData,error:upErr}=await sb.storage.from('ads').upload(fname,uploadedFile,{contentType:uploadedFile.type});
+    if(upErr)throw upErr;
+    const imageUrl=`${SUPABASE_URL}/storage/v1/object/public/ads/${fname}`;
+
+    // 2. Find placement
+    let px=0,py=0;
+    if(clickedCoords&&selW*selH>=500){
+      px=clickedCoords.x;py=clickedCoords.y;
+    } else {
+      // auto-place: find first free spot
+      const placed=findFreeSpot(selW,selH);
+      if(!placed){showToast('No space available for this block size.','error');btn.disabled=false;btn.textContent='Proceed to Checkout →';return;}
+      px=placed.x;py=placed.y;
+    }
+
+    // 3. Insert pending pixel record
+    const {data:pxData,error:pxErr}=await sb.from('pixels').insert({
+      x:px,y:py,width:selW,height:selH,
+      color:getRandomColor(),
+      image_url:imageUrl,
+      link_url:url,
+      company_name:name,
+      email:email,
+      plan:selPlan,
+      status:'pending'
+    }).select().single();
+    if(pxErr)throw pxErr;
+
+    // 4. Insert order
+    await sb.from('orders').insert({
+      pixel_id:pxData.id,
+      email:email,
+      amount_usd:selW*selH*(selPlan==='monthly'?3:1),
+      plan:selPlan,
+      status:'pending'
+    });
+
+    // 5. Redirect to Paddle (replace with your real Paddle link)
+    // window.location.href = `https://buy.paddle.com/product/YOUR_ID?email=${encodeURIComponent(email)}&custom_data=${pxData.id}`;
+
+    closeModal();
+    showToast('✓ Order received! We will email you the payment link.','success');
+    btn.textContent='Proceed to Checkout →';
+
+  } catch(err){
+    console.error(err);
+    showToast('Something went wrong. Try again.','error');
+    btn.disabled=false;
+    btn.textContent='Proceed to Checkout →';
+  }
+}
+
+function findFreeSpot(w,h){
+  // simple scan for free top-left corner
+  outer:for(let y=0;y<=ROWS-h;y+=5){
+    for(let x=0;x<=COLS-w;x+=5){
+      let free=true;
+      for(const b of activeBlocks){
+        if(x<b.x+b.width&&x+w>b.x&&y<b.y+b.height&&y+h>b.y){free=false;break;}
+      }
+      if(free)return{x,y};
+    }
+  }
+  return null;
+}
+
+const palette=['#e8c84a','#f97316','#ec4899','#3b82f6','#3ddc84','#a855f7','#ef4444','#06b6d4','#f59e0b','#84cc16'];
+function getRandomColor(){return palette[Math.floor(Math.random()*palette.length)];}
+
+// ── FAQ ───────────────────────────────────────────────────────
+document.querySelectorAll('.faq-item').forEach(item=>{
+  item.querySelector('.faq-q').addEventListener('click',()=>item.classList.toggle('open'));
+});
+
+// ── TOAST ─────────────────────────────────────────────────────
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+initCanvas();
+loadPixels();
+</script>
+</body>
+</html>
