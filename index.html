@@ -3,799 +3,671 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2mpixel.com — Own Your Pixel</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>2MPIXEL — 2,000,000 Pixels. One Standard.</title>
 <style>
-:root {
-  --bg:      #070710;
-  --bg2:     #0d0d1c;
-  --bg3:     #13132a;
-  --purple:  #7c3aed;
-  --purple2: #9d5ff5;
-  --purple3: #c084fc;
-  --blue:    #2563eb;
-  --blue2:   #3b82f6;
-  --cyan:    #06b6d4;
-  --white:   #f0eeff;
-  --muted:   #6b6880;
-  --border:  #1a1a2e;
-  --border2: #252540;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-body { background:var(--bg); color:var(--white); font-family:'Space Grotesk',sans-serif; overflow-x:hidden; }
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;600&display=swap');
 
-/* ── NAV ── */
-nav {
-  position:fixed; top:0; left:0; right:0; z-index:500;
-  background:rgba(7,7,16,0.94); backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  height:62px; padding:0 28px;
-  display:flex; align-items:center; justify-content:space-between; gap:16px;
-}
-.nav-logo { font-size:19px; font-weight:700; letter-spacing:-0.5px; flex-shrink:0; }
-.nav-logo span { color:var(--purple3); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-.nav-links { display:flex; gap:24px; }
-.nav-link { color:var(--muted); font-size:11px; font-weight:500; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:color 0.15s; }
-.nav-link:hover { color:var(--white); }
+  body {
+    background: #010510;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Orbitron', monospace;
+    cursor: grab;
+  }
+  body:active { cursor: grabbing; }
 
-.nav-stats {
-  display:flex; gap:20px; align-items:center;
-  font-family:'JetBrains Mono',monospace; font-size:11px;
-}
-.ns { display:flex; align-items:center; gap:6px; }
-.ns-dot { width:6px; height:6px; border-radius:50%; animation:dotPulse 2s infinite; }
-.ns-dot.c { background:var(--cyan); box-shadow:0 0 8px var(--cyan); }
-.ns-dot.p { background:var(--purple3); box-shadow:0 0 8px var(--purple3); animation-delay:0.5s; }
-.ns-val { color:var(--white); font-weight:700; }
-.ns-label { color:var(--muted); }
+  #canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
 
-.nav-cta {
-  background:linear-gradient(135deg,var(--purple),var(--blue));
-  color:#fff; border:none; padding:9px 20px;
-  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px;
-  letter-spacing:0.5px; cursor:pointer; transition:opacity 0.2s;
-  white-space:nowrap; flex-shrink:0;
-}
-.nav-cta:hover { opacity:0.85; }
+  /* ── UI OVERLAY ── */
+  #ui {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
 
-/* ── PROGRESS ── */
-.progress-wrap { position:fixed; top:62px; left:0; right:0; z-index:400; height:2px; background:var(--border); }
-.progress-bar { height:100%; background:linear-gradient(90deg,var(--purple),var(--cyan)); width:0%; transition:width 0.8s ease; }
+  /* NAV */
+  nav {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    background: linear-gradient(to bottom, rgba(1,5,16,0.85), transparent);
+    pointer-events: auto;
+  }
 
-/* ── HERO ── */
-.hero {
-  padding: 120px 28px 48px;
-  text-align:center;
-  position:relative; overflow:hidden;
-}
-.hero-glow-left {
-  position:absolute; width:500px; height:500px; border-radius:50%;
-  background:radial-gradient(circle,rgba(124,58,237,0.12),transparent 70%);
-  top:-100px; left:-100px; pointer-events:none;
-}
-.hero-glow-right {
-  position:absolute; width:400px; height:400px; border-radius:50%;
-  background:radial-gradient(circle,rgba(37,99,235,0.10),transparent 70%);
-  top:0; right:-50px; pointer-events:none;
-}
-.hero-tag {
-  display:inline-flex; align-items:center; gap:8px;
-  border:1px solid var(--border2); padding:6px 16px;
-  font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:2px;
-  color:var(--purple3); margin-bottom:28px;
-  animation:fadeUp 0.7s ease both;
-}
-.hero-tag::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--purple3); box-shadow:0 0 8px var(--purple3); animation:dotPulse 2s infinite; }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-diamond {
+    width: 28px; height: 28px;
+    background: #00ffcc;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    animation: diamondPulse 2s ease-in-out infinite;
+  }
+  @keyframes diamondPulse {
+    0%,100% { filter: drop-shadow(0 0 4px #00ffcc); }
+    50%     { filter: drop-shadow(0 0 12px #00ffcc); }
+  }
+  .logo-text {
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: #fff;
+  }
 
-.hero-title {
-  font-size:clamp(48px,9vw,110px); font-weight:700;
-  line-height:0.92; letter-spacing:-3px;
-  margin-bottom:24px;
-  animation:fadeUp 0.7s 0.1s ease both;
-}
-.hero-title .g {
-  background:linear-gradient(135deg,var(--purple3),var(--blue2),var(--cyan));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-}
-.hero-sub {
-  font-size:16px; color:var(--muted); max-width:520px;
-  margin:0 auto 40px; line-height:1.7;
-  animation:fadeUp 0.7s 0.2s ease both;
-}
-.hero-sub strong { color:var(--white); font-weight:600; }
+  .nav-links {
+    display: flex;
+    gap: 24px;
+  }
+  .nav-links a {
+    color: rgba(255,255,255,0.45);
+    text-decoration: none;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: #00ffcc; }
 
-.hero-nums {
-  display:flex; gap:48px; justify-content:center; flex-wrap:wrap;
-  margin-bottom:48px;
-  animation:fadeUp 0.7s 0.3s ease both;
-}
-.hn { text-align:center; }
-.hn-val { font-family:'JetBrains Mono',monospace; font-size:32px; font-weight:700; line-height:1; background:linear-gradient(135deg,var(--purple3),var(--blue2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.hn-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+  .nav-cta {
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    background: transparent;
+    padding: 8px 18px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .nav-cta:hover { background: #00ffcc; color: #000; }
 
-.hero-btn {
-  animation:fadeUp 0.7s 0.4s ease both;
-}
-.btn-ghost {
-  background:transparent; border:1px solid var(--border2);
-  color:var(--muted); padding:12px 28px;
-  font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:13px;
-  cursor:pointer; transition:all 0.2s; letter-spacing:0.5px;
-}
-.btn-ghost:hover { border-color:var(--purple2); color:var(--purple3); }
+  /* HERO */
+  .hero {
+    position: absolute;
+    left: 4%;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 400px;
+    opacity: 0;
+    animation: slideIn 0.9s ease-out 0.6s forwards;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-50%) translateX(-30px); }
+    to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+  }
 
-/* ── GRID SECTION ── */
-.grid-section { padding:0; }
-.grid-header {
-  padding:24px 28px;
-  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
-  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
-  background:var(--bg2);
-}
-.gh-title { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); }
-.gh-right { display:flex; align-items:center; gap:12px; }
-.zoom-btn {
-  background:transparent; border:1px solid var(--border2);
-  color:var(--muted); padding:6px 14px;
-  font-family:'JetBrains Mono',monospace; font-size:11px;
-  cursor:pointer; transition:all 0.15s;
-}
-.zoom-btn:hover { border-color:var(--purple2); color:var(--purple3); }
-.zoom-lbl { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); min-width:24px; text-align:center; }
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 6px;
+    color: #00ffcc;
+    margin-bottom: 14px;
+    opacity: 0.85;
+  }
 
-.legend { display:flex; gap:16px; align-items:center; }
-.leg { display:flex; align-items:center; gap:6px; font-size:10px; color:var(--muted); letter-spacing:1px; }
-.leg-dot { width:10px; height:10px; }
-.leg-dot.free { background:#1a1a30; border:1px solid #2a2a45; }
-.leg-dot.sold { background:var(--purple); }
-.leg-dot.hover { background:var(--cyan); }
+  h1 {
+    font-size: clamp(36px, 5vw, 62px);
+    font-weight: 900;
+    line-height: 0.92;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(0,255,204,0.35);
+    margin-bottom: 10px;
+  }
+  h1 .accent { color: #00ffcc; }
 
-.grid-wrap { overflow:auto; background:var(--bg); border-bottom:1px solid var(--border); }
-#grid-canvas { display:block; margin:0 auto; cursor:crosshair; }
+  .divider {
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00ffcc, transparent);
+    margin: 18px 0;
+    animation: grow 0.8s ease-out 1.6s forwards;
+  }
+  @keyframes grow { to { width: 260px; } }
 
-.grid-footer {
-  padding:12px 28px; background:var(--bg2);
-  display:flex; justify-content:space-between; align-items:center;
-  border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px;
-}
-.gf-info { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); }
-.gf-info span { color:var(--purple3); }
-#hover-info { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); min-height:16px; }
+  .subtitle {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.8;
+    color: rgba(180,255,240,0.6);
+    letter-spacing: 0.5px;
+    margin-bottom: 26px;
+  }
 
-/* ── PIXEL CARD POPUP ── */
-#pixel-card {
-  position:fixed; z-index:800;
-  background:var(--bg3); border:1px solid var(--border2);
-  padding:20px; width:260px;
-  display:none;
-  box-shadow:0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(124,58,237,0.2);
-  animation:cardIn 0.18s ease;
-}
-@keyframes cardIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-.pc-logo { width:48px; height:48px; object-fit:cover; margin-bottom:12px; border:1px solid var(--border2); }
-.pc-logo-ph { width:48px; height:48px; background:var(--bg2); border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; font-size:18px; margin-bottom:12px; }
-.pc-name { font-size:16px; font-weight:700; margin-bottom:4px; }
-.pc-tagline { font-size:12px; color:var(--muted); line-height:1.6; margin-bottom:14px; }
-.pc-meta { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:14px; }
-.pc-meta span { color:var(--purple3); }
-.pc-link {
-  display:block; text-align:center; padding:9px;
-  background:linear-gradient(135deg,var(--purple),var(--blue));
-  color:#fff; font-size:12px; font-weight:600;
-  text-decoration:none; transition:opacity 0.2s; letter-spacing:0.5px;
-}
-.pc-link:hover { opacity:0.85; }
-.pc-close {
-  position:absolute; top:12px; right:14px;
-  background:none; border:none; color:var(--muted);
-  font-size:16px; cursor:pointer;
-}
+  .cta-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    pointer-events: auto;
+  }
+  .btn-primary {
+    background: #00ffcc;
+    border: none;
+    color: #000;
+    padding: 12px 24px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .btn-primary:hover { background: #00e6b8; box-shadow: 0 0 20px rgba(0,255,204,0.4); }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.55);
+    padding: 12px 24px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: rgba(0,255,204,0.4); color: #00ffcc; }
 
-/* ── TOOLTIP ── */
-#grid-tooltip {
-  position:fixed; pointer-events:none; z-index:700;
-  background:var(--bg3); border:1px solid var(--border2);
-  padding:8px 14px; display:none;
-  box-shadow:0 4px 20px rgba(0,0,0,0.5);
-}
-#gt-name { font-size:13px; font-weight:600; color:var(--white); }
-#gt-tagline { font-size:11px; color:var(--muted); margin-top:2px; max-width:200px; }
+  /* STATS BAR */
+  .stats-bar {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    background: rgba(1,5,16,0.75);
+    border: 1px solid rgba(0,255,204,0.12);
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    animation: fadeUp 0.7s ease-out 2.2s forwards;
+    white-space: nowrap;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(14px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  .stat {
+    padding: 14px 28px;
+    text-align: center;
+    border-right: 1px solid rgba(0,255,204,0.08);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: #00ffcc;
+    text-shadow: 0 0 10px rgba(0,255,204,0.5);
+  }
+  .stat-label {
+    font-size: 8px;
+    letter-spacing: 2.5px;
+    color: rgba(150,210,200,0.45);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
 
-/* ── HOW IT WORKS ── */
-.how { padding:80px 28px; max-width:1100px; margin:0 auto; }
-.section-title { font-size:clamp(28px,4vw,44px); font-weight:700; letter-spacing:-1.5px; margin-bottom:48px; }
-.section-title span { background:linear-gradient(135deg,var(--purple3),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1px; background:var(--border); }
-.step { background:var(--bg2); padding:32px 28px; transition:background 0.2s; }
-.step:hover { background:var(--bg3); }
-.step-num { font-family:'JetBrains Mono',monospace; font-size:40px; font-weight:700; color:var(--border2); line-height:1; margin-bottom:16px; }
-.step h3 { font-size:16px; font-weight:600; margin-bottom:10px; }
-.step p { font-size:13px; color:var(--muted); line-height:1.7; }
+  /* LEGEND */
+  .legend {
+    position: absolute;
+    top: 90px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    opacity: 0;
+    animation: fadeIn 0.6s ease-out 3s forwards;
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .legend-dot {
+    width: 9px; height: 9px;
+    flex-shrink: 0;
+  }
+  .legend-label {
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: rgba(200,230,220,0.45);
+    text-transform: uppercase;
+  }
 
-/* ── PRICING ── */
-.pricing { padding:80px 28px; background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
-.pricing-inner { max-width:900px; margin:0 auto; }
-.price-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1px; background:var(--border); margin-top:44px; }
-.price-card { background:var(--bg); padding:36px 28px; position:relative; }
-.price-card.featured { background:linear-gradient(135deg,#0f0a20,#0a0a18); }
-.price-badge { position:absolute; top:0; right:24px; background:linear-gradient(135deg,var(--purple),var(--blue)); color:#fff; font-size:9px; letter-spacing:2px; text-transform:uppercase; font-weight:700; padding:4px 10px; font-family:'JetBrains Mono',monospace; }
-.price-type { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:16px; font-family:'JetBrains Mono',monospace; }
-.price-amount { font-size:52px; font-weight:700; line-height:1; background:linear-gradient(135deg,var(--purple3),var(--blue2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.price-amount sup { font-size:22px; vertical-align:top; margin-top:10px; display:inline-block; }
-.price-amount sub { font-size:14px; -webkit-text-fill-color:var(--muted); }
-.price-desc { font-size:13px; color:var(--muted); margin:14px 0 20px; line-height:1.7; }
-.price-features { list-style:none; }
-.price-features li { font-size:12px; color:#aaa; padding:7px 0; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
-.price-features li::before { content:'→'; color:var(--purple3); font-size:10px; font-family:'JetBrains Mono',monospace; }
+  /* HUD CORNERS */
+  .hud-corner {
+    position: absolute;
+    width: 36px; height: 36px;
+  }
+  .hud-tl { top: 14px; left: 14px; border-top: 1.5px solid rgba(0,255,204,0.28); border-left: 1.5px solid rgba(0,255,204,0.28); }
+  .hud-tr { top: 14px; right: 14px; border-top: 1.5px solid rgba(0,255,204,0.28); border-right: 1.5px solid rgba(0,255,204,0.28); }
+  .hud-bl { bottom: 14px; left: 14px; border-bottom: 1.5px solid rgba(0,255,204,0.28); border-left: 1.5px solid rgba(0,255,204,0.28); }
+  .hud-br { bottom: 14px; right: 14px; border-bottom: 1.5px solid rgba(0,255,204,0.28); border-right: 1.5px solid rgba(0,255,204,0.28); }
 
-/* ── MARQUEE ── */
-.marquee-wrap { overflow:hidden; padding:14px 0; background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
-.marquee-track { display:flex; width:max-content; animation:marquee 28s linear infinite; }
-.mi { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; padding:0 32px; white-space:nowrap; color:var(--muted); }
-.mi.accent { color:var(--purple3); }
+  /* DRAG HINT */
+  .drag-hint {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    opacity: 0;
+    animation: fadeIn 0.6s ease-out 4s forwards;
+  }
+  .drag-line {
+    width: 1px; height: 24px;
+    background: linear-gradient(to bottom, transparent, #00ffcc);
+    animation: lineAnim 2s ease-in-out infinite;
+  }
+  @keyframes lineAnim { 0%,100%{opacity:0.3;} 50%{opacity:0.9;} }
+  .drag-text {
+    font-size: 7px;
+    letter-spacing: 4px;
+    color: rgba(0,255,204,0.45);
+    text-transform: uppercase;
+  }
 
-/* ── WISHLIST ── */
-.wishlist-section { padding:100px 28px; background:var(--bg); }
-.wishlist-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:80px; }
-.wl-left h2 { font-size:clamp(32px,4vw,52px); font-weight:700; letter-spacing:-2px; line-height:1.0; margin-bottom:20px; }
-.wl-left h2 span { background:linear-gradient(135deg,var(--purple3),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.wl-manifesto {
-  border-left:2px solid var(--purple); padding-left:20px;
-  font-size:14px; line-height:1.9; color:var(--muted);
-  margin-bottom:32px;
-}
-.wl-manifesto strong { color:var(--white); font-weight:600; }
-.wl-counter-block { display:flex; align-items:baseline; gap:14px; }
-.wl-count { font-family:'JetBrains Mono',monospace; font-size:64px; font-weight:700; line-height:1; background:linear-gradient(135deg,var(--purple3),var(--blue2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.wl-count-label { font-size:12px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; max-width:120px; line-height:1.6; }
-
-.wl-form-wrap { background:var(--bg2); border:1px solid var(--border); }
-.wf-header { padding:20px 24px; border-bottom:1px solid var(--border); background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(37,99,235,0.10)); }
-.wf-title { font-size:16px; font-weight:700; }
-.wf-sub { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:2px; margin-top:3px; }
-.wf-body { padding:24px; }
-
-.field { margin-bottom:18px; }
-.field label { display:block; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:4px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-.field input, .field textarea, .field select {
-  width:100%; background:var(--bg);
-  border:1px solid var(--border); border-bottom:2px solid var(--border);
-  color:var(--white); padding:11px 14px;
-  font-family:'Space Grotesk',sans-serif; font-size:13px;
-  outline:none; transition:border-color 0.2s;
-  appearance:none;
-}
-.field input:focus, .field textarea:focus, .field select:focus { border-color:var(--purple2); border-bottom-color:var(--purple2); }
-.field textarea { resize:vertical; min-height:80px; }
-.field select option { background:var(--bg2); }
-
-.px-opts { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px; }
-.px-opt { border:1px solid var(--border); padding:10px 6px; text-align:center; cursor:pointer; transition:all 0.15s; background:var(--bg); }
-.px-opt:hover { border-color:var(--purple2); }
-.px-opt.active { border-color:var(--purple); background:rgba(124,58,237,0.10); }
-.px-opt-size { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; }
-.px-opt-label { font-size:10px; color:var(--muted); margin-top:2px; }
-.px-opt-price { font-size:11px; color:var(--purple3); margin-top:3px; font-weight:600; }
-
-.wf-submit {
-  width:100%; background:linear-gradient(135deg,var(--purple),var(--blue));
-  color:#fff; border:none; padding:16px;
-  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
-  cursor:pointer; transition:opacity 0.2s; letter-spacing:0.5px;
-  position:relative;
-}
-.wf-submit:hover { opacity:0.88; }
-.wf-submit:disabled { opacity:0.4; cursor:not-allowed; }
-.wf-note { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); text-align:center; margin-top:12px; letter-spacing:1px; line-height:1.6; }
-
-.success-box { display:none; padding:48px 24px; text-align:center; }
-.success-box.show { display:block; }
-.success-icon { font-size:40px; margin-bottom:16px; }
-.success-title { font-size:22px; font-weight:700; margin-bottom:10px; }
-.success-sub { font-size:13px; color:var(--muted); line-height:1.8; }
-
-/* ── FOOTER ── */
-footer { background:var(--bg2); border-top:1px solid var(--border); padding:32px 28px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
-.footer-logo { font-size:18px; font-weight:700; letter-spacing:-0.5px; }
-.footer-logo span { color:var(--purple3); }
-.footer-copy { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:1px; }
-
-/* ── TOAST ── */
-.toast { position:fixed; bottom:22px; right:22px; padding:12px 20px; font-size:13px; font-weight:600; z-index:2000; transform:translateY(50px); opacity:0; transition:all 0.3s; }
-.toast.success { background:var(--purple); color:#fff; }
-.toast.error { background:#7f1d1d; color:#fca5a5; border:1px solid #991b1b; }
-.toast.show { transform:translateY(0); opacity:1; }
-
-/* ── ANIMATIONS ── */
-@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-@keyframes dotPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-
-@media(max-width:900px) {
-  .nav-links, .nav-stats { display:none; }
-  .wishlist-inner { grid-template-columns:1fr; gap:48px; }
-  .hero-title { letter-spacing:-2px; }
-}
-@media(max-width:600px) {
-  nav { padding:0 16px; }
-  .hero { padding:100px 16px 40px; }
-  .grid-header, .grid-footer { padding:12px 16px; }
-  .wishlist-section { padding:60px 16px; }
-  footer { padding:24px 16px; }
-  .how, .pricing { padding:60px 16px; }
-}
+  /* PIXEL COUNTER */
+  #pixel-counter {
+    font-size: clamp(36px, 5vw, 62px);
+    font-weight: 900;
+  }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-logo">2m<span>pixel</span>.com</div>
-  <div class="nav-links">
-    <span class="nav-link" onclick="document.getElementById('grid-section').scrollIntoView({behavior:'smooth'})">Grid</span>
-    <span class="nav-link" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</span>
-    <span class="nav-link" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Pricing</span>
-    <span class="nav-link" onclick="document.getElementById('apply').scrollIntoView({behavior:'smooth'})">Apply</span>
-  </div>
-  <div class="nav-stats">
-    <div class="ns"><div class="ns-dot c"></div><span class="ns-val" id="nav-free">—</span><span class="ns-label">&nbsp;free</span></div>
-    <div class="ns"><div class="ns-dot p"></div><span class="ns-val" id="nav-sold">—</span><span class="ns-label">&nbsp;sold</span></div>
-  </div>
-  <button class="nav-cta" onclick="document.getElementById('apply').scrollIntoView({behavior:'smooth'})">Apply Now</button>
-</nav>
+<canvas id="canvas"></canvas>
 
-<div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-glow-left"></div>
-  <div class="hero-glow-right"></div>
-  <div class="hero-tag">The internet's most curated billboard</div>
-  <h1 class="hero-title">2 Million<br><span class="g">Pixels.</span><br>One Standard.</h1>
-  <p class="hero-sub">
-    A living billboard where <strong>only the right brands</strong> earn their place.
-    Rent your space from <strong>$100/month</strong>. First come, first served.
-  </p>
-  <div class="hero-nums">
-    <div class="hn"><div class="hn-val" id="h-sold">0</div><div class="hn-label">Pixels Rented</div></div>
-    <div class="hn"><div class="hn-val" id="h-brands">0</div><div class="hn-label">Brands Live</div></div>
-    <div class="hn"><div class="hn-val">$0.10</div><div class="hn-label">Per Pixel / Mo</div></div>
-    <div class="hn"><div class="hn-val">2M</div><div class="hn-label">Total Pixels</div></div>
-  </div>
-  <div class="hero-btn">
-    <button class="btn-ghost" onclick="document.getElementById('grid-section').scrollIntoView({behavior:'smooth'})">Explore the grid ↓</button>
-  </div>
-</section>
-
-<!-- GRID -->
-<section id="grid-section">
-  <div class="grid-header">
-    <div>
-      <div class="gh-title">2000 × 1000 Live Billboard</div>
-      <div class="legend" style="margin-top:8px">
-        <div class="leg"><div class="leg-dot free"></div>Available</div>
-        <div class="leg"><div class="leg-dot sold"></div>Rented</div>
-        <div class="leg"><div class="leg-dot hover"></div>Hover</div>
-      </div>
+<div id="ui">
+  <nav>
+    <div class="logo">
+      <div class="logo-diamond"></div>
+      <span class="logo-text">2MPIXEL</span>
     </div>
-    <div class="gh-right">
-      <button class="zoom-btn" id="btn-zo">− Zoom</button>
-      <span class="zoom-lbl" id="zoom-lbl">1×</span>
-      <button class="zoom-btn" id="btn-zi">+ Zoom</button>
+    <div class="nav-links">
+      <a href="#">Grid</a>
+      <a href="#">Apply</a>
+      <a href="#">About</a>
+    </div>
+    <button class="nav-cta">Apply Now</button>
+  </nav>
+
+  <div class="hero">
+    <div class="eyebrow">Internet Billboard · Est. 2025</div>
+    <h1>
+      <span id="pixel-counter">0</span>
+      <br><span class="accent">PIXELS.</span>
+      <br>ONE
+      <br>STANDARD.
+    </h1>
+    <div class="divider"></div>
+    <p class="subtitle">
+      The internet's most curated digital billboard.<br>
+      $0.10 per pixel per month.<br>
+      Not everyone gets accepted.
+    </p>
+    <div class="cta-group">
+      <button class="btn-primary">Apply for Pixels</button>
+      <button class="btn-secondary">Explore Grid</button>
     </div>
   </div>
-  <div class="grid-wrap"><canvas id="grid-canvas"></canvas></div>
-  <div class="grid-footer">
-    <div class="gf-info">Free: <span id="gf-free">—</span> · Rented: <span id="gf-sold">—</span> · <span id="gf-pct">0%</span> full</div>
-    <div id="hover-info">Hover to explore · Click brand to see details</div>
-  </div>
-</section>
 
-<!-- HOW IT WORKS -->
-<section class="how" id="how">
-  <h2 class="section-title">How it <span>works</span></h2>
-  <div class="steps">
-    <div class="step"><div class="step-num">01</div><h3>Apply</h3><p>Submit your brand for review. We manually check every application. Not everyone gets in — and that's the point.</p></div>
-    <div class="step"><div class="step-num">02</div><h3>Get approved</h3><p>If your brand fits the standard, you'll receive an email within 48 hours with next steps and payment info.</p></div>
-    <div class="step"><div class="step-num">03</div><h3>Choose your space</h3><p>Select your pixel block. Minimum 1,000 pixels. Larger blocks get priority placement on the grid.</p></div>
-    <div class="step"><div class="step-num">04</div><h3>Go live</h3><p>Upload your logo and tagline. Your brand appears on the grid instantly — seen by everyone who visits.</p></div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-val">2M</div><div class="stat-label">Total Pixels</div></div>
+    <div class="stat"><div class="stat-val">$0.10</div><div class="stat-label">Per Pixel/Mo</div></div>
+    <div class="stat"><div class="stat-val" id="sold-pct">0%</div><div class="stat-label">Occupied</div></div>
+    <div class="stat"><div class="stat-val">$200K</div><div class="stat-label">At Capacity</div></div>
   </div>
-</section>
 
-<!-- MARQUEE -->
-<div class="marquee-wrap">
-  <div class="marquee-track">
-    <span class="mi accent">2mpixel</span><span class="mi">· curated brands only ·</span>
-    <span class="mi accent">$0.10 / px / month</span><span class="mi">· minimum 1,000 pixels ·</span>
-    <span class="mi accent">2,000,000 pixels</span><span class="mi">· apply now ·</span>
-    <span class="mi accent">early access open</span><span class="mi">· 48h response ·</span>
-    <span class="mi accent">2mpixel</span><span class="mi">· curated brands only ·</span>
-    <span class="mi accent">$0.10 / px / month</span><span class="mi">· minimum 1,000 pixels ·</span>
-    <span class="mi accent">2,000,000 pixels</span><span class="mi">· apply now ·</span>
-    <span class="mi accent">early access open</span><span class="mi">· 48h response ·</span>
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#00ffcc;box-shadow:0 0 5px #00ffcc"></div>
+      <span class="legend-label">Active brands</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#7c3aed;box-shadow:0 0 5px #7c3aed"></div>
+      <span class="legend-label">Reserved</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#f59e0b;box-shadow:0 0 5px #f59e0b"></div>
+      <span class="legend-label">Featured</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#1e293b"></div>
+      <span class="legend-label">Available</span>
+    </div>
+  </div>
+
+  <div class="hud-corner hud-tl"></div>
+  <div class="hud-corner hud-tr"></div>
+  <div class="hud-corner hud-bl"></div>
+  <div class="hud-corner hud-br"></div>
+
+  <div class="drag-hint">
+    <div class="drag-line"></div>
+    <span class="drag-text">Drag to explore</span>
   </div>
 </div>
 
-<!-- PRICING -->
-<section class="pricing" id="pricing">
-  <div class="pricing-inner">
-    <h2 class="section-title">Simple <span>pricing</span></h2>
-    <div class="price-cards">
-      <div class="price-card">
-        <div class="price-type">Entry</div>
-        <div class="price-amount"><sup>$</sup>100<sub>/mo</sub></div>
-        <p class="price-desc">1,000 pixels. The minimum entry point. Perfect for growing brands making their mark.</p>
-        <ul class="price-features">
-          <li>1,000 pixels (min)</li><li>Logo + tagline + link</li><li>Hover interaction</li><li>Monthly renewal</li>
-        </ul>
-      </div>
-      <div class="price-card featured">
-        <div class="price-badge">Popular</div>
-        <div class="price-type">Statement</div>
-        <div class="price-amount"><sup>$</sup>500<sub>/mo</sub></div>
-        <p class="price-desc">5,000 pixels. A visible presence. You'll be noticed. You'll be remembered.</p>
-        <ul class="price-features">
-          <li>5,000 pixels</li><li>Logo + tagline + link</li><li>Priority placement</li><li>Monthly renewal</li>
-        </ul>
-      </div>
-      <div class="price-card">
-        <div class="price-type">Flagship</div>
-        <div class="price-amount"><sup>$</sup>1k+<sub>/mo</sub></div>
-        <p class="price-desc">10,000+ pixels. Dominant presence. For brands that want to own the grid. Contact for bulk pricing.</p>
-        <ul class="price-features">
-          <li>10,000+ pixels</li><li>Custom placement</li><li>Dedicated support</li><li>contact@2mpixel.com</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- WISHLIST -->
-<section class="wishlist-section" id="apply">
-  <div class="wishlist-inner">
-    <div class="wl-left">
-      <h2>Reserve your<br><span>space.</span></h2>
-      <div class="wl-manifesto">
-        2mpixel has a point of view.<br><br>
-        We believe the internet is better with brands that
-        <strong>build, create, and inspire.</strong>
-        This space is reserved for them.<br><br>
-        If your brand makes people's lives better,
-        more interesting, or more connected —
-        <strong>you belong here.</strong><br><br>
-        If it doesn't, you already know.
-      </div>
-      <div class="wl-counter-block">
-        <div class="wl-count" id="wl-count">0</div>
-        <div class="wl-count-label">brands already on the list</div>
-      </div>
-    </div>
-
-    <div class="wl-right">
-      <div class="wl-form-wrap">
-        <div class="wf-header">
-          <div class="wf-title">Early Access Application</div>
-          <div class="wf-sub">All applications reviewed manually · 48h response</div>
-        </div>
-        <div class="wf-body" id="wf-body">
-          <div class="field"><label>Brand / Company *</label><input type="text" id="f-brand" placeholder="Your brand name"></div>
-          <div class="field"><label>Website *</label><input type="url" id="f-website" placeholder="https://yourbrand.com"></div>
-          <div class="field"><label>Contact Email *</label><input type="email" id="f-email" placeholder="you@yourbrand.com"></div>
-          <div class="field"><label>Brand Tagline * <span style="color:var(--muted);font-size:9px">(shown on grid hover)</span></label><input type="text" id="f-tagline" placeholder="One sentence — what you do and why it matters" maxlength="100"></div>
-          <div class="field">
-            <label>Pixels interested in</label>
-            <div class="px-opts">
-              <div class="px-opt active" onclick="selPx(1000,this)"><div class="px-opt-size">1,000</div><div class="px-opt-label">entry</div><div class="px-opt-price">$100/mo</div></div>
-              <div class="px-opt" onclick="selPx(5000,this)"><div class="px-opt-size">5,000</div><div class="px-opt-label">statement</div><div class="px-opt-price">$500/mo</div></div>
-              <div class="px-opt" onclick="selPx(10000,this)"><div class="px-opt-size">10,000</div><div class="px-opt-label">flagship</div><div class="px-opt-price">$1,000/mo</div></div>
-              <div class="px-opt" onclick="selPx(25000,this)"><div class="px-opt-size">25,000</div><div class="px-opt-label">dominant</div><div class="px-opt-price">$2,500/mo</div></div>
-              <div class="px-opt" onclick="selPx(50000,this)"><div class="px-opt-size">50,000</div><div class="px-opt-label">landmark</div><div class="px-opt-price">$5,000/mo</div></div>
-              <div class="px-opt" onclick="selPx(0,this)"><div class="px-opt-size">100k+</div><div class="px-opt-label">custom</div><div class="px-opt-price">let's talk</div></div>
-            </div>
-          </div>
-          <div class="field"><label>Tell us about your brand *</label><textarea id="f-desc" placeholder="What does your brand do? What makes it worth a spot on the grid?"></textarea></div>
-          <button class="wf-submit" id="wf-submit" onclick="submitWishlist()">Submit Application →</button>
-          <div class="wf-note">We review every application personally.<br>You'll hear back within 48 hours.</div>
-        </div>
-        <div class="success-box" id="success-box">
-          <div class="success-icon">✦</div>
-          <div class="success-title">Application received.</div>
-          <div class="success-sub">We'll review your brand and get back within 48 hours.<br><br>In the meantime — tell someone about 2mpixel.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-logo">2m<span>pixel</span>.com</div>
-  <div class="footer-copy">© 2025 · contact@2mpixel.com · All rights reserved</div>
-</footer>
-
-<!-- PIXEL CARD -->
-<div id="pixel-card">
-  <button class="pc-close" onclick="closeCard()">×</button>
-  <div id="pc-img-wrap"></div>
-  <div class="pc-name" id="pc-name"></div>
-  <div class="pc-tagline" id="pc-tagline"></div>
-  <div class="pc-meta">Size: <span id="pc-size"></span> · Plan: <span id="pc-plan"></span></div>
-  <a class="pc-link" id="pc-link" href="#" target="_blank">Visit brand →</a>
-</div>
-
-<!-- TOOLTIP -->
-<div id="grid-tooltip">
-  <div id="gt-name"></div>
-  <div id="gt-tagline"></div>
-</div>
-
-<div class="toast" id="toast"></div>
+<!-- Three.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────────
-const SB_URL = 'https://gyxwqqyihqxuydqyldyr.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5eHdxcXlpaHF4dXlkcXlsZHlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MjYyNjIsImV4cCI6MjA5MzUwMjI2Mn0.Un7yB3tx73yu-TvTIqWHYJMP2rocCEIpkXHPwuwoNtQ';
-const sb = supabase.createClient(SB_URL, SB_KEY);
-const COLS=2000, ROWS=1000, TOTAL=COLS*ROWS;
+// ═══════════════════════════════════════════
+// SETUP — scena, kamera, renderer
+// ═══════════════════════════════════════════
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x010510, 1);
 
-// ── CANVAS ────────────────────────────────────────────────────
-const canvas = document.getElementById('grid-canvas');
-const ctx    = canvas.getContext('2d');
-const zooms  = [1,2,4,8];
-let zoomIdx=0, zoom=1;
-let imgData, buf32;
-let blocks=[], hovIdx=-1;
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x010510, 18, 45);
 
-// Starfield state — free pixels that twinkle
-let stars=[];
-const STAR_COUNT=400;
+// PerspectiveCamera sa fov 75
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 2, 26); // startna pozicija za uvodni zoom
 
-function hexToRgba(hex,a=255) {
-  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
-  return (a<<24)|(b<<16)|(g<<8)|r;
+// ═══════════════════════════════════════════
+// SVETLA
+// ═══════════════════════════════════════════
+scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+dirLight.position.set(10, 10, 5);
+scene.add(dirLight);
+
+const tealLight = new THREE.PointLight(0x00ffcc, 3, 10);
+tealLight.position.set(0, 0, 4);
+scene.add(tealLight);
+
+const purpleLight = new THREE.PointLight(0x7c3aed, 2, 14);
+purpleLight.position.set(-8, 4, 2);
+scene.add(purpleLight);
+
+const amberLight = new THREE.PointLight(0xf59e0b, 2, 14);
+amberLight.position.set(8, -4, 2);
+scene.add(amberLight);
+
+// ═══════════════════════════════════════════
+// ZVEZDE — ručno pravljene
+// ═══════════════════════════════════════════
+const starGeo = new THREE.BufferGeometry();
+const starCount = 2500;
+const starPos = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount * 3; i++) {
+  starPos[i] = (Math.random() - 0.5) * 160;
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+const starMat = new THREE.PointsMaterial({ color: 0xc8e6ff, size: 0.08, transparent: true, opacity: 0.7 });
+scene.add(new THREE.Points(starGeo, starMat));
+
+// ═══════════════════════════════════════════
+// PIXEL GRID — instanced mesh (80×50 = 4000 instanci)
+// ═══════════════════════════════════════════
+const COLS = 80, ROWS = 50;
+const COUNT = COLS * ROWS;
+const GAP = 0.22;
+
+const boxGeo = new THREE.BoxGeometry(0.16, 0.16, 0.12);
+const boxMat = new THREE.MeshStandardMaterial({
+  vertexColors: true,
+  metalness: 0.55,
+  roughness: 0.35,
+});
+const grid = new THREE.InstancedMesh(boxGeo, boxMat, COUNT);
+grid.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+scene.add(grid);
+
+// Kategorije piksela (jednom generisane)
+const categories = new Float32Array(COUNT);
+for (let i = 0; i < COUNT; i++) categories[i] = Math.random();
+
+// Boje
+const colorActive   = new THREE.Color(0x00ffcc);
+const colorReserved = new THREE.Color(0x7c3aed);
+const colorFeatured = new THREE.Color(0xf59e0b);
+const colorFree     = new THREE.Color(0x0a1628);
+const tempColor     = new THREE.Color();
+const dummy         = new THREE.Object3D();
+
+// Inicijalna postava
+for (let i = 0; i < COUNT; i++) {
+  const col = i % COLS;
+  const row = Math.floor(i / COLS);
+  dummy.position.set((col - COLS / 2) * GAP, (row - ROWS / 2) * GAP, 0);
+  dummy.scale.setScalar(1);
+  dummy.updateMatrix();
+  grid.setMatrixAt(i, dummy.matrix);
+
+  const cat = categories[i];
+  if (cat > 0.92)      grid.setColorAt(i, colorActive);
+  else if (cat > 0.85) grid.setColorAt(i, colorReserved);
+  else if (cat > 0.80) grid.setColorAt(i, colorFeatured);
+  else                 grid.setColorAt(i, colorFree);
+}
+grid.instanceMatrix.needsUpdate = true;
+if (grid.instanceColor) grid.instanceColor.needsUpdate = true;
+
+// ═══════════════════════════════════════════
+// GRID WIREFRAME OKVIR
+// ═══════════════════════════════════════════
+const W = COLS * GAP;
+const H = ROWS * GAP;
+const frameGeo = new THREE.EdgesGeometry(new THREE.PlaneGeometry(W + 0.5, H + 0.5));
+const frameMat = new THREE.LineBasicMaterial({ color: 0x00ffcc, transparent: true, opacity: 0.08 });
+scene.add(new THREE.LineSegments(frameGeo, frameMat));
+
+// ═══════════════════════════════════════════
+// ORBITNE SFERE
+// ═══════════════════════════════════════════
+const sphereData = [
+  { x:  6.5, y:  2.5, z: 0.5, color: 0x7c3aed, r: 0.28 },
+  { x: -5.5, y: -2,   z: 1,   color: 0xf59e0b, r: 0.20 },
+  { x:  4,   y: -3.5, z: -1,  color: 0x00ffcc, r: 0.24 },
+  { x: -7,   y:  3,   z: 0,   color: 0xec4899, r: 0.15 },
+];
+const spheres = sphereData.map(d => {
+  const m = new THREE.Mesh(
+    new THREE.SphereGeometry(d.r, 16, 16),
+    new THREE.MeshStandardMaterial({
+      color: d.color, emissive: d.color, emissiveIntensity: 1.4,
+      metalness: 0.8, roughness: 0.1
+    })
+  );
+  m.position.set(d.x, d.y, d.z);
+  m.userData = { ox: d.x, oy: d.y };
+  scene.add(m);
+  return m;
+});
+
+// ═══════════════════════════════════════════
+// MOUSE / TOUCH ORBIT KONTROLA
+// ═══════════════════════════════════════════
+let isDragging = false;
+let prevMouse = { x: 0, y: 0 };
+let rotX = 0.15, rotY = 0;
+let targetRotX = 0.15, targetRotY = 0;
+
+canvas.addEventListener('mousedown', e => { isDragging = true; prevMouse = { x: e.clientX, y: e.clientY }; });
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - prevMouse.x;
+  const dy = e.clientY - prevMouse.y;
+  targetRotY += dx * 0.005;
+  targetRotX += dy * 0.003;
+  targetRotX = Math.max(-0.5, Math.min(0.5, targetRotX));
+  prevMouse = { x: e.clientX, y: e.clientY };
+});
+
+// Touch support
+canvas.addEventListener('touchstart', e => {
+  isDragging = true;
+  prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+window.addEventListener('touchend', () => isDragging = false);
+window.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  const dx = e.touches[0].clientX - prevMouse.x;
+  const dy = e.touches[0].clientY - prevMouse.y;
+  targetRotY += dx * 0.005;
+  targetRotX += dy * 0.003;
+  targetRotX = Math.max(-0.5, Math.min(0.5, targetRotX));
+  prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+
+// Scroll zoom
+window.addEventListener('wheel', e => {
+  camera.position.z = Math.max(8, Math.min(28, camera.position.z + e.deltaY * 0.02));
+});
+
+// ═══════════════════════════════════════════
+// KAMERA INTRO — zoom in
+// ═══════════════════════════════════════════
+let introProgress = 0;
+const introStart = 26, introEnd = 13;
+
+// ═══════════════════════════════════════════
+// COUNTER ANIMACIJA
+// ═══════════════════════════════════════════
+const counterEl = document.getElementById('pixel-counter');
+const soldEl    = document.getElementById('sold-pct');
+let counterDone = false;
+
+function animCounter() {
+  const target = 2000000;
+  const dur = 2400;
+  const start = Date.now();
+  const tick = () => {
+    const p = Math.min((Date.now() - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    counterEl.textContent = Math.floor(ease * target).toLocaleString();
+    if (p < 1) requestAnimationFrame(tick);
+    else counterDone = true;
+  };
+  requestAnimationFrame(tick);
 }
 
-function initCanvas() {
-  const W=COLS*zoom, H=ROWS*zoom;
-  canvas.width=W; canvas.height=H;
-  imgData=ctx.createImageData(W,H);
-  buf32=new Uint32Array(imgData.data.buffer);
-  initStars();
-  redraw();
+// Animacija "sold %" — simulacija
+let soldPct = 0;
+function animSold() {
+  const tick = () => {
+    soldPct = Math.min(soldPct + 0.08, 8.4);
+    soldEl.textContent = soldPct.toFixed(1) + '%';
+    if (soldPct < 8.4) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 
-function fillRect(x,y,w,h,rgba) {
-  const W=COLS*zoom;
-  for(let dy=0;dy<h*zoom;dy++)
-    for(let dx=0;dx<w*zoom;dx++)
-      buf32[(y*zoom+dy)*W+(x*zoom+dx)]=rgba;
-}
+setTimeout(animCounter, 700);
+setTimeout(animSold, 2400);
 
-// ── STARFIELD ── free pixels twinkle
-function initStars() {
-  stars=[];
-  for(let i=0;i<STAR_COUNT;i++) {
-    stars.push({
-      x: Math.floor(Math.random()*COLS),
-      y: Math.floor(Math.random()*ROWS),
-      phase: Math.random()*Math.PI*2,
-      speed: 0.015+Math.random()*0.025,
-      color: Math.random()>0.5 ? 'purple' : 'blue'
-    });
-  }
-}
+// ═══════════════════════════════════════════
+// RESIZE
+// ═══════════════════════════════════════════
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
 
-function getStarAlpha(star,t) {
-  return (Math.sin(star.phase + t*star.speed)+1)/2;
-}
+// ═══════════════════════════════════════════
+// RENDER LOOP — glavna petlja
+// ═══════════════════════════════════════════
+const clock = new THREE.Clock();
 
-function redraw(t=0) {
-  const W=COLS*zoom;
-  buf32.fill(0xff0d0d18);
-
-  // draw stars (free pixels twinkling)
-  stars.forEach(s=>{
-    // skip if covered by a block
-    const covered=blocks.some(b=>s.x>=b.x&&s.x<b.x+b.width&&s.y>=b.y&&s.y<b.y+b.height);
-    if(covered) return;
-    const a=Math.floor(getStarAlpha(s,t)*140)+20;
-    const rgba=s.color==='purple'
-      ? ((a<<24)|(0xed<<16)|(0x3a<<8)|0x7c) // purple
-      : ((a<<24)|(0xf6<<16)|(0x82<<8)|0x3b); // blue
-    for(let dy=0;dy<zoom;dy++)
-      for(let dx=0;dx<zoom;dx++)
-        buf32[(s.y*zoom+dy)*W+(s.x*zoom+dx)]=rgba;
-  });
-
-  // draw blocks
-  blocks.forEach((b,i)=>{
-    const isHov=i===hovIdx;
-    let rgba;
-    if(isHov) {
-      rgba=hexToRgba('#06b6d4'); // cyan hover
-    } else {
-      rgba=b._rgba || (b._rgba=hexToRgba(b.color||'#7c3aed'));
-    }
-    fillRect(b.x,b.y,b.width,b.height,rgba);
-    // border glow on hover
-    if(isHov) {
-      // top/bottom border
-      for(let dx=0;dx<b.width*zoom;dx++) {
-        buf32[b.y*zoom*W+b.x*zoom+dx]=0xffffffff;
-        buf32[(b.y+b.height)*zoom*W-W+b.x*zoom+dx]=0xffffffff;
-      }
-    }
-  });
-
-  ctx.putImageData(imgData,0,0);
-}
-
-// ── ANIMATION LOOP ────────────────────────────────────────────
-let animT=0;
 function animate() {
-  animT++;
-  redraw(animT);
   requestAnimationFrame(animate);
-}
+  const t = clock.getElapsedTime();
+  const dt = clock.getDelta ? 0.016 : 0.016;
 
-// ── INTERACTION ────────────────────────────────────────────────
-function canvasXY(e) {
-  const r=canvas.getBoundingClientRect();
-  const cx=(e.clientX-r.left)*(canvas.width/r.width);
-  const cy=(e.clientY-r.top)*(canvas.height/r.height);
-  return [Math.floor(cx/zoom),Math.floor(cy/zoom)];
-}
-function blockAt(gx,gy) {
-  return blocks.findIndex(b=>gx>=b.x&&gx<b.x+b.width&&gy>=b.y&&gy<b.y+b.height);
-}
-
-const tooltip=document.getElementById('grid-tooltip');
-canvas.addEventListener('mousemove',e=>{
-  const [gx,gy]=canvasXY(e);
-  const bi=blockAt(gx,gy);
-  if(bi!==hovIdx){ hovIdx=bi; }
-  if(bi>=0){
-    const b=blocks[bi];
-    document.getElementById('hover-info').innerHTML=`<span style="color:var(--purple3)">${b.company_name}</span> · ${b.width}×${b.height}px · hover to preview`;
-    document.getElementById('gt-name').textContent=b.company_name;
-    document.getElementById('gt-tagline').textContent=b.tagline||b.link_url||'';
-    tooltip.style.display='block';
-    tooltip.style.left=(e.clientX+16)+'px';
-    tooltip.style.top=(e.clientY-10)+'px';
-  } else {
-    document.getElementById('hover-info').textContent=`X:${gx} Y:${gy} · Available — apply to reserve`;
-    tooltip.style.display='none';
+  // Kamera intro zoom
+  if (introProgress < 1) {
+    introProgress = Math.min(introProgress + 0.008, 1);
+    const ease = 1 - Math.pow(1 - introProgress, 3);
+    camera.position.z = introStart + (introEnd - introStart) * ease;
   }
-});
 
-canvas.addEventListener('mouseleave',()=>{
-  hovIdx=-1; tooltip.style.display='none';
-  document.getElementById('hover-info').textContent='Hover to explore · Click brand to see details';
-});
+  // Smooth orbit (lerp)
+  rotX += (targetRotX - rotX) * 0.06;
+  rotY += (targetRotY - rotY) * 0.06;
 
-canvas.addEventListener('click',e=>{
-  const [gx,gy]=canvasXY(e);
-  const bi=blockAt(gx,gy);
-  if(bi>=0) openCard(blocks[bi],e);
-  else document.getElementById('apply').scrollIntoView({behavior:'smooth'});
-});
+  // Auto-rotate kad nije drag
+  if (!isDragging) targetRotY += 0.0015;
 
-// ── PIXEL CARD ────────────────────────────────────────────────
-function openCard(b,e) {
-  const card=document.getElementById('pixel-card');
-  document.getElementById('pc-name').textContent=b.company_name||'Unknown';
-  document.getElementById('pc-tagline').textContent=b.tagline||'';
-  document.getElementById('pc-size').textContent=`${b.width}×${b.height} (${(b.width*b.height).toLocaleString()}px)`;
-  document.getElementById('pc-plan').textContent=b.plan||'monthly';
-  document.getElementById('pc-link').href=b.link_url||'#';
-  const imgWrap=document.getElementById('pc-img-wrap');
-  imgWrap.innerHTML=b.image_url
-    ?`<img class="pc-logo" src="${b.image_url}" alt="">`
-    :`<div class="pc-logo-ph">${(b.company_name||'?')[0].toUpperCase()}</div>`;
-  // position card
-  const x=Math.min(e.clientX+10, window.innerWidth-280);
-  const y=Math.min(e.clientY+10, window.innerHeight-320);
-  card.style.left=x+'px'; card.style.top=y+'px';
-  card.style.display='block';
-}
-function closeCard() { document.getElementById('pixel-card').style.display='none'; }
-document.addEventListener('click',e=>{
-  const card=document.getElementById('pixel-card');
-  if(card.style.display==='block' && !card.contains(e.target) && e.target!==canvas) closeCard();
-});
+  // Pivot rotacija grida
+  grid.rotation.x = rotX;
+  grid.rotation.y = rotY;
+  frameGeo && (scene.children.forEach(c => {
+    if (c.isLineSegments) { c.rotation.x = rotX; c.rotation.y = rotY; }
+  }));
 
-// ── ZOOM ──────────────────────────────────────────────────────
-document.getElementById('btn-zi').addEventListener('click',()=>{
-  if(zoomIdx<zooms.length-1){zoomIdx++;zoom=zooms[zoomIdx];initCanvas();}
-  document.getElementById('zoom-lbl').textContent=zoom+'×';
-});
-document.getElementById('btn-zo').addEventListener('click',()=>{
-  if(zoomIdx>0){zoomIdx--;zoom=zooms[zoomIdx];initCanvas();}
-  document.getElementById('zoom-lbl').textContent=zoom+'×';
-});
+  // Pixel talasna animacija
+  for (let i = 0; i < COUNT; i++) {
+    const col = i % COLS;
+    const row = Math.floor(i / COLS);
+    const x = (col - COLS / 2) * GAP;
+    const y = (row - ROWS / 2) * GAP;
+    const wave = Math.sin(col * 0.28 + t * 1.1) * Math.cos(row * 0.28 + t * 0.75) * 0.18;
 
-// ── LOAD PIXELS ───────────────────────────────────────────────
-async function loadPixels() {
-  const {data}=await sb.from('pixels').select('*').eq('status','active');
-  blocks=data||[];
-  const sold=blocks.reduce((s,b)=>s+b.width*b.height,0);
-  const free=TOTAL-sold;
-  const fmt=n=>n.toLocaleString('en-US');
-  document.getElementById('nav-free').textContent=fmt(free);
-  document.getElementById('nav-sold').textContent=fmt(sold);
-  document.getElementById('h-sold').textContent=fmt(sold);
-  document.getElementById('h-brands').textContent=blocks.length;
-  document.getElementById('gf-free').textContent=fmt(free);
-  document.getElementById('gf-sold').textContent=fmt(sold);
-  document.getElementById('gf-pct').textContent=(sold/TOTAL*100).toFixed(3)+'%';
-  document.getElementById('progress-bar').style.width=(sold/TOTAL*100)+'%';
-}
+    dummy.position.set(x, y, wave);
+    const sc = 0.88 + Math.abs(wave) * 1.5;
+    dummy.scale.setScalar(sc);
+    dummy.rotation.z = wave * 0.3;
+    dummy.updateMatrix();
+    grid.setMatrixAt(i, dummy.matrix);
 
-// ── LOAD WISHLIST COUNT ───────────────────────────────────────
-async function loadWLCount() {
-  const {count}=await sb.from('wishlist').select('*',{count:'exact',head:true});
-  const n=count||0;
-  // animate
-  const el=document.getElementById('wl-count');
-  const dur=1600; const start=performance.now();
-  function step(now) {
-    const p=Math.min((now-start)/dur,1);
-    const ease=1-Math.pow(1-p,3);
-    el.textContent=Math.floor(ease*n);
-    if(p<1) requestAnimationFrame(step); else el.textContent=n;
+    // Boja pulsiranje
+    const cat = categories[i];
+    const pulse = Math.sin(t * 1.8 + i * 0.07) * 0.5 + 0.5;
+    if (cat > 0.92) {
+      tempColor.setRGB(0, 0.6 + pulse * 0.4, 0.55 + pulse * 0.45);
+    } else if (cat > 0.85) {
+      tempColor.setRGB(0.35 + pulse * 0.2, 0.08, 0.75 + pulse * 0.25);
+    } else if (cat > 0.80) {
+      tempColor.setRGB(0.85 + pulse * 0.15, 0.45 + pulse * 0.25, 0);
+    } else {
+      const d = 0.035 + pulse * 0.035;
+      tempColor.setRGB(d * 0.8, d * 0.9, d * 1.6);
+    }
+    grid.setColorAt(i, tempColor);
   }
-  requestAnimationFrame(step);
-}
+  grid.instanceMatrix.needsUpdate = true;
+  if (grid.instanceColor) grid.instanceColor.needsUpdate = true;
 
-// ── WISHLIST FORM ─────────────────────────────────────────────
-let selPixels=1000;
-function selPx(n,el) {
-  selPixels=n;
-  document.querySelectorAll('.px-opt').forEach(x=>x.classList.remove('active'));
-  el.classList.add('active');
-}
-
-async function submitWishlist() {
-  const brand   =document.getElementById('f-brand').value.trim();
-  const website =document.getElementById('f-website').value.trim();
-  const email   =document.getElementById('f-email').value.trim();
-  const tagline =document.getElementById('f-tagline').value.trim();
-  const desc    =document.getElementById('f-desc').value.trim();
-  if(!brand||!website||!email||!tagline||!desc){showToast('Please fill all required fields.','error');return;}
-  const btn=document.getElementById('wf-submit');
-  btn.disabled=true; btn.textContent='Submitting…';
-  const {error}=await sb.from('wishlist').insert({
-    brand_name:brand, website, email,
-    pixels_interest:selPixels,
-    description:desc,
-    tagline,
-    status:'pending'
+  // Orbitne sfere
+  spheres.forEach((s, i) => {
+    s.position.x = s.userData.ox + Math.sin(t * 0.45 + i * 1.4) * 0.6;
+    s.position.y = s.userData.oy + Math.cos(t * 0.6 + i * 1.1) * 0.4;
+    s.rotation.y = t * 0.5;
   });
-  if(error){showToast('Something went wrong. Try again.','error');btn.disabled=false;btn.textContent='Submit Application →';return;}
-  document.getElementById('wf-body').style.display='none';
-  document.getElementById('success-box').classList.add('show');
-  loadWLCount();
+
+  // Teal light pulsiranje
+  tealLight.intensity = 2.5 + Math.sin(t * 2) * 0.8;
+
+  renderer.render(scene, camera);
 }
 
-// ── TOAST ─────────────────────────────────────────────────────
-function showToast(msg,type='success'){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast '+type+' show';
-  setTimeout(()=>t.classList.remove('show'),3500);
-}
-
-// ── INIT ──────────────────────────────────────────────────────
-async function init(){
-  await loadPixels();
-  initCanvas();
-  animate();
-  loadWLCount();
-}
-init();
+animate();
 </script>
 </body>
 </html>
